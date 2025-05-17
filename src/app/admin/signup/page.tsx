@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://election-admin-backend-production.up.railway.app';
+
 export default function AdminSignupPage() {
   const router = useRouter();
-
   const [formData, setFormData] = useState({
     username: '',
     fullName: '',
@@ -24,21 +25,25 @@ export default function AdminSignupPage() {
     setError('');
     setSuccess('');
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
-    });
+    try {
+      const res = await fetch(`${API_URL}/admin/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      setError(data.message || 'Signup failed');
-      return;
+      if (!res.ok) {
+        setError(data.message || 'Signup failed');
+        return;
+      }
+
+      setSuccess('Signup successful! Redirecting to login...');
+      setTimeout(() => router.push('/admin/login'), 2000);
+    } catch (err) {
+      setError('Network error. Please try again.');
     }
-
-    setSuccess('Signup successful! Redirecting to login...');
-    setTimeout(() => router.push('/admin/login'), 2000);
   };
 
   return (
